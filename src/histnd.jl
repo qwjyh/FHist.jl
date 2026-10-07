@@ -268,3 +268,13 @@ function restrict(h::HistND{T, N}, lows = ntuple(_ -> -Inf, Val(N)), highs = ntu
 end
 # Duplicated methods with `Hist1D`
 #restrict(lows, highs) = Base.Fix{2}(Base.Fix{3}(restrict, highs), lows)
+
+function Base.convert(::Type{Hist1D}, h::HistND{T, 1}) where {T}
+    return Hist1D(; counttype = T, binedges = only(binedges(h)), bincounts = bincounts(h), sumw2 = sumw2(h), nentries = nentries(h), overflow = h.overflow)
+end
+function Base.convert(::Type{Hist2D}, h::HistND{T, 2}) where {T}
+    return Hist2D(; counttype = T, binedges = binedges(h), bincounts = bincounts(h), sumw2 = sumw2(h), nentries = nentries(h), overflow = h.overflow)
+end
+function Base.convert(::Type{Hist3D}, h::HistND{T, 3}) where {T}
+    return Hist3D(; counttype = T, binedges = binedges(h), bincounts = bincounts(h), sumw2 = sumw2(h), nentries = nentries(h), overflow = h.overflow)
+end

@@ -150,36 +150,54 @@ end
 end
 
 @testset "HistND" begin
-    for N in (4, 5)
-        vals = ntuple(_ -> rand(10), N)
-        h = HistND{Float64, N}(vals)
-        @test integral(h) == 10
-        @test nentries(h) == 10
+    @testset "N=1" begin
+        vals = rand(10)
+        rs = 0:0.1:1
+        h1 = Hist1D(vals; binedges = rs)
+        h2 = HistND{Float64, 1}((vals,); binedges = (rs,))
+        @test h1 == convert(Hist1D, h2)
+    end
 
-        rs = ntuple(i -> 0:(1 / 2^i):1, N)
-        wgts = weights(2*ones(length(vals[1])))
-        h = HistND{Float64, N}(vals; weights = wgts, binedges = rs)
-        @test nentries(h) == 10
-        @test integral(h) == sum(wgts)
-        @test nbins(h) == ntuple(i -> length(rs[i]) - 1, N)
+    @testset "N=2" begin
+        vals = (rand(10), rand(10))
+        rs = (0:0.1:1, 0:0.1:1)
+        h1 = Hist2D(vals; binedges = rs)
+        h2 = HistND{Float64, 2}(vals; binedges = rs)
+        @test h1 == convert(Hist2D, h2)
+    end
 
-        @test bincenters(HistND{Float64, N}(vals; binedges = ntuple(_ -> 0:1,N))) == ntuple(_ -> [0.5], N)
-        @test bincenters(HistND{Float64, N}(vals; weights = wgts, binedges = ntuple(_ -> 0:1, N))) == ntuple(_ -> [0.5], N)
-        @test nbins(HistND{Float64, N}(vals; binedges =ntuple(_ -> [0,0.5,1],N))) == ntuple(_ -> 2, N)
-        @test nbins(HistND{Float64, N}(vals; binedges =ntuple(_ -> [0,0.3,1],N))) == ntuple(_ -> 2,N)
-        @test nbins(HistND{Float64, N}(vals; weights = wgts, binedges =ntuple(_ -> [0,0.5,1],N))) == ntuple(_ -> 2,N)
-        @test nbins(HistND{Float64, N}(vals; weights = wgts, binedges =ntuple(_ -> [0,0.3,1],N))) == ntuple(_ -> 2,N)
+    @testset "N=4,5" begin
+        for N in (4, 5)
+            vals = ntuple(_ -> rand(10), N)
+            h = HistND{Float64, N}(vals)
+            @test integral(h) == 10
+            @test nentries(h) == 10
 
-        @test integral(HistND{Float64, N}(vals; weights = wgts, nbins=ntuple(_ -> 5,N))) == sum(wgts)
-        @test integral(HistND{Float64, N}(vals; nbins=ntuple(_ -> 5,N))) == length(vals[1])
+            rs = ntuple(i -> 0:(1 / 2^i):1, N)
+            wgts = weights(2*ones(length(vals[1])))
+            h = HistND{Float64, N}(vals; weights = wgts, binedges = rs)
+            @test nentries(h) == 10
+            @test integral(h) == sum(wgts)
+            @test nbins(h) == ntuple(i -> length(rs[i]) - 1, N)
 
-        h1 = HistND{Float64, N}(vals; weights=wgts, binedges=rs)
-        h2 = HistND{Float64, N}(; binedges=rs)
-        h3 = HistND{Float64, N}(; binedges=rs)
-        push!.(h2, zip(vals...), wgts)
-        atomic_push!.(h3, zip(vals...), wgts)
-        @test h1 == h2
-        @test h1 == h3
+            @test bincenters(HistND{Float64, N}(vals; binedges = ntuple(_ -> 0:1,N))) == ntuple(_ -> [0.5], N)
+            @test bincenters(HistND{Float64, N}(vals; weights = wgts, binedges = ntuple(_ -> 0:1, N))) == ntuple(_ -> [0.5], N)
+            @test nbins(HistND{Float64, N}(vals; binedges =ntuple(_ -> [0,0.5,1],N))) == ntuple(_ -> 2, N)
+            @test nbins(HistND{Float64, N}(vals; binedges =ntuple(_ -> [0,0.3,1],N))) == ntuple(_ -> 2,N)
+            @test nbins(HistND{Float64, N}(vals; weights = wgts, binedges =ntuple(_ -> [0,0.5,1],N))) == ntuple(_ -> 2,N)
+            @test nbins(HistND{Float64, N}(vals; weights = wgts, binedges =ntuple(_ -> [0,0.3,1],N))) == ntuple(_ -> 2,N)
+
+            @test integral(HistND{Float64, N}(vals; weights = wgts, nbins=ntuple(_ -> 5,N))) == sum(wgts)
+            @test integral(HistND{Float64, N}(vals; nbins=ntuple(_ -> 5,N))) == length(vals[1])
+
+            h1 = HistND{Float64, N}(vals; weights=wgts, binedges=rs)
+            h2 = HistND{Float64, N}(; binedges=rs)
+            h3 = HistND{Float64, N}(; binedges=rs)
+            push!.(h2, zip(vals...), wgts)
+            atomic_push!.(h3, zip(vals...), wgts)
+            @test h1 == h2
+            @test h1 == h3
+        end
     end
 end
 

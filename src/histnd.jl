@@ -278,3 +278,15 @@ end
 function Base.convert(::Type{Hist3D}, h::HistND{T, 3}) where {T}
     return Hist3D(; counttype = T, binedges = binedges(h), bincounts = bincounts(h), sumw2 = sumw2(h), nentries = nentries(h), overflow = h.overflow)
 end
+
+function slices(h::HistND{T, N}, axis::Integer) where {T, N}
+    binedges_sliced = h.binedges[axis]
+    lows = fill(-Inf, (N,))
+    highs = fill(Inf, (N,))
+    return Iterators.map(1:(length(binedges_sliced) - 1)) do i
+        lows[axis] = binedges_sliced[i]
+        highs[axis] = binedges_sliced[i + 1]
+        h_restricted = restrict(h, lows, highs)
+        project(h_restricted, (axis,))
+    end
+end

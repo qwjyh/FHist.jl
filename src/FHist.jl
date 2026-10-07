@@ -1,7 +1,7 @@
 module FHist
 
 export Hist1D, binedges, bincounts, bincenters, binerrors, nbins, integral, nentries, significance
-export sample, lookup, cumulative, normalize, restrict, rebin, bayes_rebin_edges, sumw2
+export sample, lookup, cumulative, normalize, restrict, rebin, bayes_rebin_edges, sumw2, slices
 export atomic_push!
 
 export Hist2D, project, profile, transpose

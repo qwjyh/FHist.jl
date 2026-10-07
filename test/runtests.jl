@@ -728,6 +728,17 @@ end
     @test_throws AssertionError restrict(h, 10, Inf)
 end
 
+@testset "Slices" begin
+    h = HistND{Float64, 2}(([0.25, 0.25, 0.75], [0.25, 0.75, 0.75]); binedges = (0:0.5:1, 0:0.5:1))
+    h_slices = slices(h, 1)
+    @test length(h_slices) == 2
+    @show bincounts(first(h_slices))
+    @show bincounts(last(h_slices))
+    # Keep `nentries`
+    @test first(h_slices) == HistND{Float64, 1}(; binedges = (0:0.5:1,), bincounts = [1; 1], sumw2 = [1; 1], nentries = nentries(h))
+    @test last(h_slices) == HistND{Float64, 1}(; binedges = (0:0.5:1,), bincounts = [0; 1], sumw2 = [0; 1], nentries = nentries(h))
+end
+
 
 function _pushloop(h,a)
     for v in a

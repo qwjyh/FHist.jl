@@ -264,7 +264,7 @@ function restrict(h::HistND{T, N}, lows = ntuple(_ -> -Inf, Val(N)), highs = ntu
     end
     c = bincounts(h)[sels...]
     s2 = sumw2(h)[sels...]
-    return Hist3D(; binedges = edges, bincounts = c, sumw2 = s2, nentries = nentries(h), overflow = h.overflow)
+    return HistND{T, N}(; binedges = edges, bincounts = c, sumw2 = s2, nentries = nentries(h), overflow = h.overflow)
 end
 # Duplicated methods with `Hist1D`
 #restrict(lows, highs) = Base.Fix{2}(Base.Fix{3}(restrict, highs), lows)

@@ -70,6 +70,7 @@ a single `NTuple`.
 @inline function Base.push!(h::HistND{T, N}, vals::NTuple{N, Real}, w::Real = one(T)) where {T, N}
     Ls = nbins(h)
     is = ntuple(Val(N)) do i
+        @inline
         @inbounds _binindex(h.binedges[i], Ls[i], h.overflow, vals[i])
     end
     any(==(0), is) && return nothing
@@ -98,6 +99,7 @@ function Base.append!(h::HistND{T, N}, vals::NTuple{N, <:AbstractVector}, wgts::
         for i in eachindex(first(vals))
             @inbounds push!(
                 h, ntuple(Val(N)) do j
+                    @inline
                     vals[j][i]
                 end, wgts[i]
             )
@@ -111,12 +113,8 @@ function Base.append!(h::HistND{T, N}, vals::NTuple{N, <:AbstractVector}) where 
     allequal(length, vals) || throw(DimensionMismatch("append! to histogram expect same length values and weights"))
     lock(h)
     try
-        for i in eachindex(first(vals))
-            @inbounds push!(
-                h, ntuple(Val(N)) do j
-                    vals[j][i]
-                end
-            )
+        for val in zip(vals...)
+            @inbounds push!(h, val)
         end
     finally
         unlock(h)

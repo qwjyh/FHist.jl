@@ -447,6 +447,7 @@ function _fast_bincounts!(h::HistND{T, N}, A, weights) where {T, N}
     if isnothing(weights)
         for j_input in eachindex(first(A))
             ks_bin = ntuple(Val{N}()) do i_dim
+                @inline
                 _binindex(bs[i_dim], Ls[i_dim], overflow, A[i_dim][j_input])
             end
             any(==(0), ks_bin) && continue
@@ -458,6 +459,7 @@ function _fast_bincounts!(h::HistND{T, N}, A, weights) where {T, N}
         s2 = sumw2(h)
         for j_input in eachindex(first(A))
             ks_bin = ntuple(Val{N}()) do i_dim
+                @inline
                 _binindex(bs[i_dim], Ls[i_dim], overflow, A[i_dim][j_input])
             end
             any(==(0), ks_bin) && continue

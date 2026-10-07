@@ -82,7 +82,7 @@ end
 """
     atomic_push!(h::Hist{T, N}, vals::NTuple{N, Real}, w::Real = 1) where {T, N}
 
-Slower but thread-safe version of [`Base.push!(::Hist, ::NTuple, ::Real)`](@ref)
+Slower but thread-safe version of [`Base.push!(::HistND, ::NTuple, ::Real)`](@ref)
 """
 @inline function atomic_push!(h::HistND{T, N}, vals::NTuple{N, Real}, w::Real = one(T)) where {T, N}
     lock(h)

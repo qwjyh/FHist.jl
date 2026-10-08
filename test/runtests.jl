@@ -270,6 +270,25 @@ end
     ntw = normalize(t; width = true)
     @test bincounts(ntw) == [4 / 6, 0, 1 / 6] # count [1, 0, 0.5] div by width [1, 1, 2] and area normalized
     @test integral(ntw; width=true) == 1 #self-consistent
+
+    @testset "HistND{T, 1}" begin
+        t = HistND{Float64, 1}(; binedges = ([0, 1, 2, 4],))
+        push!(t, (0.5,), 0.5);
+        push!(t, (0.5,), 0.5);
+        push!(t, (2.5,), 0.5);
+        # 0.5 + 0.5 + 0.5 = 1.5
+
+        @test integral(t) == 1.5
+        @test integral(t; width=true) == 2
+
+        nt = normalize(t; width=false)
+        @test bincounts(nt) == bincounts(t) ./ 1.5
+        @test integral(nt) == 1 # self-consistent requirement
+
+        ntw = normalize(t; width = true)
+        @test bincounts(ntw) == [4 / 6, 0, 1 / 6] # count [1, 0, 0.5] div by width [1, 1, 2] and area normalized
+        @test integral(ntw; width=true) == 1 #self-consistent
+    end
 end
 
 

@@ -172,8 +172,8 @@ function normalize(h::HistND{T, N}; width = false) where {T, N}
             volume = prod(zip(widths, tuple(ci))) do (width, i)
                 width[i]
             end
-            hn.bincounts /= volume
-            hn.sumw2 /= volume^2
+            hn.bincounts[ci] /= volume
+            hn.sumw2[ci] /= volume^2
         end
     end
     return hn

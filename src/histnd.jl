@@ -287,6 +287,6 @@ function slices(h::HistND{T, N}, axis::Integer) where {T, N}
         lows[axis] = binedges_sliced[i]
         highs[axis] = binedges_sliced[i + 1]
         h_restricted = restrict(h, lows, highs)
-        project(h_restricted, (axis,))
+        (binedges_sliced[i], binedges_sliced[i + 1]), project(h_restricted, (axis,))
     end
 end

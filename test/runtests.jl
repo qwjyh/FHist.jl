@@ -732,11 +732,11 @@ end
     h = HistND{Float64, 2}(([0.25, 0.25, 0.75], [0.25, 0.75, 0.75]); binedges = (0:0.5:1, 0:0.5:1))
     h_slices = slices(h, 1)
     @test length(h_slices) == 2
-    @show bincounts(first(h_slices))
-    @show bincounts(last(h_slices))
     # Keep `nentries`
-    @test first(h_slices) == HistND{Float64, 1}(; binedges = (0:0.5:1,), bincounts = [1; 1], sumw2 = [1; 1], nentries = nentries(h))
-    @test last(h_slices) == HistND{Float64, 1}(; binedges = (0:0.5:1,), bincounts = [0; 1], sumw2 = [0; 1], nentries = nentries(h))
+    @test first(first(h_slices)) == (0, 0.5)
+    @test last(first(h_slices)) == HistND{Float64, 1}(; binedges = (0:0.5:1,), bincounts = [1; 1], sumw2 = [1; 1], nentries = nentries(h))
+    @test first(last(h_slices)) == (0.5, 1)
+    @test last(last(h_slices)) == HistND{Float64, 1}(; binedges = (0:0.5:1,), bincounts = [0; 1], sumw2 = [0; 1], nentries = nentries(h))
 end
 
 

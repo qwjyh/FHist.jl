@@ -48,7 +48,7 @@ function integral(h::HistND{T, N}; width = false) where {T, N}
         widths = map(diff, h.binedges)
         counts = bincounts(h)
         return sum(eachindex(IndexCartesian(), counts)) do ci
-            volume = prod(zip(widths, tuple(ci))) do (width, i)
+            volume = prod(zip(widths, Tuple(ci))) do (width, i)
                 width[i]
             end
             counts[ci] * volume
@@ -169,7 +169,7 @@ function normalize(h::HistND{T, N}; width = false) where {T, N}
     if width
         widths = map(diff, h.binedges)
         for ci in eachindex(IndexCartesian(), hn.bincounts)
-            volume = prod(zip(widths, tuple(ci))) do (width, i)
+            volume = prod(zip(widths, Tuple(ci))) do (width, i)
                 width[i]
             end
             hn.bincounts[ci] /= volume

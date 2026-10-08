@@ -289,6 +289,21 @@ end
         @test bincounts(ntw) == [4 / 6, 0, 1 / 6] # count [1, 0, 0.5] div by width [1, 1, 2] and area normalized
         @test integral(ntw; width=true) == 1 #self-consistent
     end
+
+    @testset "Hist{T, 2}" begin
+        t = HistND{Float64, 2}(; binedges = ([0, 1, 2, 4], [0, 1, 2, 4]))
+        push!(t, (0.5, 0.5), 0.5)
+        push!(t, (0.5, 1.5), 0.5)
+        push!(t, (2.5, 2.5), 0.5)
+
+        @test integral(t) == 1.5
+        @test integral(t; width = true) == 0.5 * 1 * 1 + 0.5 * 1 * 1 + 0.5 * 2 * 2
+
+        ntw = normalize(t; width = true)
+        # bincouts divided by areas and sum of weight
+        @test bincounts(ntw) == [0.5 0.5 0; 0 0 0; 0 0 0.5] ./ ([1, 1, 2] * [1, 1, 2]') / 1.5
+        @test integral(ntw; width = true) == 1
+    end
 end
 
 

@@ -255,6 +255,8 @@ Returns a new histogram with restricted axes: the slice of `h` where the bin cen
 the given (inclusive) intervals along each axis.
 """
 function restrict(h::HistND{T, N}, lows = ntuple(_ -> -Inf, Val(N)), highs = ntuple(_ -> Inf, Val(N))) where {T, N}
+    lows::NTuple{N, T} = lows
+    highs::NTuple{N, T} = highs
     bs = h.binedges
     sels = ntuple(Val(N)) do i
         _restrict_bins(bs[i], lows[i], highs[i])

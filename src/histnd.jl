@@ -123,7 +123,7 @@ function Base.append!(h::HistND{T, N}, vals::NTuple{N, <:AbstractVector}) where 
 end
 
 function _project1d(h::HistND{T, N}, dim::Int) where {T, N}
-    dims_remove = ntuple(Val(N)) do i
+    dims_remove = ntuple(Val(N - 1)) do i
         i < dim ? i : i + 1
     end
     return project(h, dims_remove)
@@ -132,7 +132,7 @@ end
 for op in (:mean, :std, :median)
     @eval function Statistics.$op(h::HistND{T, N}) where {T, N}
         return ntuple(Val(N)) do i
-            $op(_project1d(h, i))
+            $op(convert(Hist1D, _project1d(h, i)))
         end
     end
 end

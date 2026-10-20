@@ -405,6 +405,13 @@ end
     @test quantile(h1, 0.0) == first(bincenters(h1))
     @test quantile(h1, 1.0) == last(bincenters(h1))
 
+    hn = HistND{Float64, 4}((randn(N), randn(N), randn(N), randn(N)); binedges = (r, r, r, r))
+    @test all(zip(mean(hn), (0, 0, 0, 0))) do (x, y)
+        isapprox(x, y; atol = 0.05)
+    end
+    @test all(zip(std(hn), (1, 1, 1, 1))) do (x, y)
+        isapprox(x, y; atol = 0.1)
+    end
 end
 
 @testset "Lookup" begin

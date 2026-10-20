@@ -283,11 +283,15 @@ end
 
 function slices(h::HistND{T, N}, axis::Integer) where {T, N}
     binedges_sliced = h.binedges[axis]
-    lows = fill(-Inf, (N,))
-    highs = fill(Inf, (N,))
     return Iterators.map(1:(length(binedges_sliced) - 1)) do i
-        lows[axis] = binedges_sliced[i]
-        highs[axis] = binedges_sliced[i + 1]
+        lows = ntuple(Val(N)) do j
+            @inline
+            j == axis ? binedges_sliced[i] : -Inf
+        end
+        highs = ntuple(Val(N)) do j
+            @inline
+            j == axis ? binedges_sliced[i + 1] : Inf
+        end
         h_restricted = restrict(h, lows, highs)
         (binedges_sliced[i], binedges_sliced[i + 1]), project(h_restricted, (axis,))
     end

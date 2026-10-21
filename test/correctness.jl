@@ -247,8 +247,15 @@ end
     h3w = Hist3D(; binedges=(-3:3, -3:3, -3:3))
     append!(h3w, x, y, z, w)
     @test h3w == Hist3D((x, y, z); binedges=(-3:3, -3:3, -3:3), weights=w)
+    hn = HistND{Float64, 4}(; binedges=(-3:3, -3:3, -3:3, -3:3))
+    @test append!(hn, (x, y, z, w)) === hn
+    @test hn == HistND{Float64, 4}((x, y, z, w); binedges=(-3:3, -3:3, -3:3, -3:3))
+    hnw = HistND{Float64, 4}(; binedges=(-3:3, -3:3, -3:3, -3:3))
+    append!(hnw, (x, y, z, w), w)
+    @test hnw == HistND{Float64, 4}((x, y, z, w); binedges=(-3:3, -3:3, -3:3, -3:3), weights=w)
     @test_throws DimensionMismatch append!(h2, x, y[1:10])
     @test_throws DimensionMismatch append!(h3, x, y, z, w[1:10])
+    @test_throws DimensionMismatch append!(hn, (x, y, z, w[1:10]))
     h1 = Hist1D(; binedges=-3:3)
     @test append!(h1, x) === h1
     # a failing push! (InexactError for Int counts) must not leave the lock held
@@ -357,6 +364,18 @@ end
     @test median(h3) isa NTuple{3,Float64}
     @test mean(h3)[1] == mean(project(project(h3, :z), :x))
     @test mean(h3)[3] == mean(project(project(h3, :x), :y))
+end
+
+@testset "Statistics for HistND" begin
+    r = -3:0.1:3
+    N = 10^5
+    hn = HistND{Float64, 4}((randn(N), randn(N), randn(N), randn(N)); binedges = (r, r, r, r))
+    @test all(zip(mean(hn), (0, 0, 0, 0))) do (x, y)
+        isapprox(x, y; atol = 0.05)
+    end
+    @test all(zip(std(hn), (1, 1, 1, 1))) do (x, y)
+        isapprox(x, y; atol = 0.1)
+    end
 end
 
 @testset "Display" begin

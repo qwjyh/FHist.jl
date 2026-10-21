@@ -744,6 +744,9 @@ end
         @test all(occursin.(["edges:", "total count:", "bin counts:", "<svg"], repr("text/html", h1)))
         @test all(occursin.(["edges=", "integral=", "Hist"], repr(h1, context=:compact=>true)))
     end
+
+    hn = HistND{Float64, 4}((randn(10), randn(10), randn(10), randn(10)); binedges = (-3:0.1:3, -3:0.1:3, -3:0.1:3, -3:0.1:3))
+    @test all(occursin.(["HistND{Float64, 4}", "edges=", "integral="], repr(hn)))
 end
 
 @testset "Restrict" begin

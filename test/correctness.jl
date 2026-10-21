@@ -222,6 +222,8 @@ end
     @test empty!(h2) === h2 && nentries(h2) == 0
     h3 = Hist3D((randn(10), randn(10), randn(10)); binedges=(-3:3, -3:3, -3:3))
     @test empty!(h3) === h3 && nentries(h3) == 0
+    h4 = HistND{Float64, 4}((randn(10), randn(10), randn(10), randn(10)); binedges=(-3:3, -3:3, -3:3, -3:3))
+    @test empty!(h4) === h4 && nentries(h4) == 0
 
     ha = Hist1D([0.5]; binedges=0:1)
     hb = Hist1D([0.5]; binedges=[0, 1.0])

@@ -281,6 +281,21 @@ function Base.convert(::Type{Hist3D}, h::HistND{T, 3}) where {T}
     return Hist3D(; counttype = T, binedges = binedges(h), bincounts = bincounts(h), sumw2 = sumw2(h), nentries = nentries(h), overflow = h.overflow)
 end
 
+"""
+    slices(h::HistND{T, N}, axis::Integer)
+
+Get N-1 dim sliced histogram along `axis`. Returns an iterator of tuples of sliced axis edges (`(low, high)`) and sliced histogram.
+
+```jldoctest; setup = :(using FHist)
+julia> h = HistND{Float64, 2}(([0.25, 0.75], [0.25, 0.75]); binedges=(0:0.5:1, 0:0.5:1))
+HistND{Float64, 2}, edges=(0.0:0.5:1.0, 0.0:0.5:1.0), integral=2.0
+
+julia> collect(slices(h, 2))
+2-element Vector{Tuple{Tuple{Float64, Float64}, HistND{Float64, 1}}}:
+ ((0.0, 0.5), HistND{Float64, 1}, edges=(0.0:0.5:1.0,), integral=1.0)
+ ((0.5, 1.0), HistND{Float64, 1}, edges=(0.0:0.5:1.0,), integral=1.0)
+```
+"""
 function slices(h::HistND{T, N}, axis::Integer) where {T, N}
     binedges_sliced = h.binedges[axis]
     return Iterators.map(1:(length(binedges_sliced) - 1)) do i

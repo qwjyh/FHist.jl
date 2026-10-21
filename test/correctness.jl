@@ -232,6 +232,13 @@ end
     @test length(Set([ha, hb])) == 1
     @test hash(ha) != hash(Hist1D([0.5]; binedges=0:1, overflow=true))
     @test ha != Hist1D([0.5]; binedges=0:1, overflow=true)
+    hna = HistND{Float64, 1}(([0.5],); binedges=(0:1,))
+    hnb = HistND{Float64, 1}(([0.5],); binedges=([0, 1.0],))
+    @test hna == hnb
+    @test hash(hna) == hash(hnb)
+    @test length(Set([hna, hnb])) == 1
+    @test hash(hna) != hash(HistND{Float64, 1}(([0.5],); binedges=(0:1,), overflow=true))
+    @test hna != HistND{Float64, 1}(([0.5],); binedges=(0:1,), overflow=true)
 end
 
 @testset "append! for all dimensions" begin

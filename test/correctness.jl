@@ -289,7 +289,7 @@ end
 
 @testset "rebin / restrict for all dimensions" begin
     Random.seed!(9)
-    x, y, z = rand(1000), rand(1000), rand(1000)
+    x, y, z, w = rand(1000), rand(1000), rand(1000), rand(1000)
     r = 0:0.1:1
     v = [0.0, 0.1, 0.3, 0.6, 1.0]
 
@@ -297,6 +297,7 @@ end
     h1 = Hist1D(x; binedges=r)
     h2 = Hist2D((x, y); binedges=(r, r))
     h3 = Hist3D((x, y, z); binedges=(r, r, r))
+    h4 = HistND{Float64, 4}((x, y, z, w); binedges=(r, r, r, r))
     @test (h2 |> rebin(5)) == rebin(h2, 5, 5)
     @test (h3 |> rebin(5)) == rebin(h3, 5, 5, 5)
     @test (h3 |> rebin(5, 2, 10)) == rebin(h3, 5, 2, 10)
@@ -313,6 +314,18 @@ end
     @test_throws ErrorException rebin(h3, 3)
     @test rebin(h3, 1) == h3
 
+    # 4D integer rebin
+    r4 = rebin(h4, (1, 2, 5, 10))
+    @test nbins(r4) == (10, 5, 2, 1)
+    @test integral(r4) == integral(h4)
+    @test sum(sumw2(r4)) == sum(sumw2(h4))
+    @test nentries(r4) == nentries(h4)
+    @test binedges(r4) == (0:0.1:1, 0:0.2:1, 0:0.5:1, 0:1.0:1)
+    @test all(b -> b.isrange, r4.binedges)
+    @test r4 == HistND{Float64, 4}((x, y, z, w); binedges=(0:0.1:1, 0:0.2:1, 0:0.5:1, 0:1.:1))
+    @test_throws ErrorException rebin(h4, 3)
+    @test rebin(h4, 1) == h4
+
     # edge based rebin, 1D/2D/3D
     @test rebin(h1, [0.0, 0.2, 0.5, 1.0]) == Hist1D(x; binedges=[0.0, 0.2, 0.5, 1.0])
     hsub = rebin(h1, [0.2, 0.5])
@@ -321,18 +334,22 @@ end
     @test nentries(hsub) == nentries(h1)  # nentries is carried over as is
     @test rebin(h2, [0.0, 0.5, 1.0], [0.0, 0.2, 1.0]) == Hist2D((x, y); binedges=([0.0, 0.5, 1.0], [0.0, 0.2, 1.0]))
     @test rebin(h3, [0.0, 0.5, 1.0], [0.0, 0.2, 1.0], [0.0, 1.0]) == Hist3D((x, y, z); binedges=([0.0, 0.5, 1.0], [0.0, 0.2, 1.0], [0.0, 1.0]))
+    @test rebin(h4, ([0.0, 0.7, 1.0], [0.0, 0.5, 1.0], [0.0, 0.2, 1.0], [0.0, 1.0])) == HistND{Float64, 4}((x, y, z, w); binedges=([0.0, 0.7, 1.0], [0.0, 0.5, 1.0], [0.0, 0.2, 1.0], [0.0, 1.0]))
     @test_throws ArgumentError rebin(h2, [0.0, 0.55, 1.0], [0.0, 1.0])
     # the overflow flag is dropped when the new edges do not span the full range
     ho = Hist1D(x; binedges=r, overflow=true)
     @test rebin(ho, [0.0, 0.5, 1.0]).overflow
     @test !rebin(ho, [0.2, 0.5]).overflow
     @test rebin(Hist2D((x, y); binedges=(r, r), overflow=true), 2).overflow
+    @test rebin(HistND{Float64, 2}((x, y); binedges=(r, r), overflow=true), 2).overflow
 
     # rebinning keeps the exact original edge values (no re-derivation from first/last)
     hv = Hist1D(x; binedges=v)
     @test binedges(rebin(hv, 2)) == [0.0, 0.3, 1.0]
     hv2 = Hist2D((x, y); binedges=(v, v))
     @test binedges(rebin(hv2, 2)) == ([0.0, 0.3, 1.0], [0.0, 0.3, 1.0])
+    hv4 = HistND{Float64, 4}((x, y, z, w); binedges=(v, v, v, v))
+    @test binedges(rebin(hv4, 2)) == ([0.0, 0.3, 1.0], [0.0, 0.3, 1.0], [0.0, 0.3, 1.0], [0.0, 0.3, 1.0])
 
     # 3D restrict
     rs = restrict(h3, 0.2, 0.55, -Inf, Inf, 0.5, Inf)
@@ -343,6 +360,14 @@ end
     @test rs == (h3 |> restrict(0.2, 0.55, -Inf, Inf, 0.5, Inf))
     @test restrict(h3) == h3
     @test_throws AssertionError restrict(h3, 5, 6)
+    # 4D restrict
+    rs4 = restrict(h4, (0.2, -Inf, 0.5, -Inf), (0.55, Inf, Inf, Inf))
+    @test nbins(rs4) == (4, 10, 5, 10)
+    @test binedges(rs4)[1] == 0.2:0.1:0.6
+    @test binedges(rs4)[3] == 0.5:0.1:1.0
+    @test integral(rs4) == count((0.2 .<= x .< 0.6) .& (0.5 .<= z))
+    @test restrict(h4) == h4
+    @test_throws AssertionError restrict(h4, (5., -Inf, -Inf, -Inf), (6., Inf, Inf, Inf))
     # 1D/2D restrict keep ranges as ranges
     @test binedges(restrict(h1, 0.2, 0.55)) == 0.2:0.1:0.6
     @test restrict(h1, 0.2, 0.55).binedges[1].isrange

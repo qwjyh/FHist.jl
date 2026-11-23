@@ -156,6 +156,7 @@ end
         h1 = Hist1D(vals; binedges = rs)
         h2 = HistND{Float64, 1}((vals,); binedges = (rs,))
         @test h1 == convert(Hist1D, h2)
+        @test h2 == convert(HistND{Float64, 1}, convert(Hist1D, h2))
     end
 
     @testset "N=2" begin
@@ -164,6 +165,7 @@ end
         h1 = Hist2D(vals; binedges = rs)
         h2 = HistND{Float64, 2}(vals; binedges = rs)
         @test h1 == convert(Hist2D, h2)
+        @test h2 == convert(HistND{Float64, 2}, convert(Hist2D, h2))
     end
 
     @testset "N=4,5" begin

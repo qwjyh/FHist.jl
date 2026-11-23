@@ -280,6 +280,21 @@ end
 function Base.convert(::Type{Hist3D}, h::HistND{T, 3}) where {T}
     return Hist3D(; counttype = T, binedges = binedges(h), bincounts = bincounts(h), sumw2 = sumw2(h), nentries = nentries(h), overflow = h.overflow)
 end
+function Base.convert(::Type{HistND{T, 1}}, h::Hist1D{T}) where {T}
+    return HistND{T, 1}(;
+        binedges = (binedges(h),), bincounts = bincounts(h), sumw2 = sumw2(h), nentries = nentries(h), overflow = h.overflow
+    )
+end
+function Base.convert(::Type{HistND{T, 2}}, h::Hist2D{T}) where {T}
+    return HistND{T, 2}(;
+        binedges = binedges(h), bincounts = bincounts(h), sumw2 = sumw2(h), nentries = nentries(h), overflow = h.overflow
+    )
+end
+function Base.convert(::Type{HistND{T, 3}}, h::Hist3D{T}) where {T}
+    return HistND{T, 3}(;
+        binedges = binedges(h), bincounts = bincounts(h), sumw2 = sumw2(h), nentries = nentries(h), overflow = h.overflow
+    )
+end
 
 """
     slices(h::HistND{T, N}, axis::Integer)
